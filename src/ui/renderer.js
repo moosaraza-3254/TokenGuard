@@ -3,9 +3,18 @@
  * All DOM rendering — keeps business logic out of the view layer.
  */
 import { humanDuration, formatTimestamp } from '../utils/time.js';
-import { toast } from './toast.js';
 
 const TIME_FIELDS = ['exp', 'iat', 'nbf'];
+
+/** Makes untrusted text safe to put inside HTML. */
+export function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 
@@ -32,7 +41,7 @@ export function renderSigResult(result) {
   const el = document.getElementById('sigVerifyResult');
   if (!result || Object.keys(result).length === 0) {
     el.className = '';
-    el.innerHTML = '';
+    el.textContent = '';
     return;
   }
   const { valid, error } = result;
@@ -55,55 +64,42 @@ function renderClaimsTable(payload) {
   tbody.innerHTML = '';
   for (const [k, v] of Object.entries(payload)) {
     const tr = document.createElement('tr');
-    let valHtml = String(v);
+    const shown = typeof v === 'object' && v !== null ? JSON.stringify(v) : String(v);
     let extra = '';
 
     if (TIME_FIELDS.includes(k) && typeof v === 'number') {
-      extra = `<span class="time-label">${formatTimestamp(v)}</span>`;
+      extra = `<span class="time-label">${escapeHtml(formatTimestamp(v))}</span>`;
       if (k === 'exp') {
-        const now = Math.floor(Date.now() / 1000);
-        const diff = v - now;
+        const diff = v - Math.floor(Date.now() / 1000);
         const label = diff > 0
           ? `expires in ${humanDuration(diff)}`
           : `expired ${humanDuration(-diff)} ago`;
         extra += `<span class="time-label" style="color:${diff > 0 ? 'var(--valid)' : 'var(--danger)'}">${label}</span>`;
       }
     }
-    tr.innerHTML = `<td>${k}</td><td>${valHtml}${extra}</td>`;
+    tr.innerHTML = `<td>${escapeHtml(k)}</td><td>${escapeHtml(shown)}${extra}</td>`;
     tbody.appendChild(tr);
   }
 }
 
+// Temporary simple checks. Phase 5 replaces this with the full rule engine.
 export function getSecurityWarnings(header, payload) {
   const warnings = [];
 
-  if (!header.alg || header.alg.toLowerCase() === 'none') {
+  if (!header.alg || String(header.alg).toLowerCase() === 'none') {
     warnings.push('Weak algorithm: "none" is insecure.');
   }
 
   const now = Math.floor(Date.now() / 1000);
-  if (payload.exp && payload.exp < now) {
-    warnings.push('Expired token.');
-  }
-
-  if (payload.exp && (payload.exp - now) > 31536000) {
-    warnings.push('Very long expiry (longer than 1 year).');
-  }
-
-  if (!payload.aud) {
-    warnings.push('Missing aud (audience) claim.');
-  }
-
-  if (!payload.iss) {
-    warnings.push('Missing iss (issuer) claim.');
-  }
+  if (payload.exp && payload.exp < now) warnings.push('Expired token.');
+  if (payload.exp && (payload.exp - now) > 31536000) warnings.push('Very long expiry (longer than 1 year).');
+  if (!payload.aud) warnings.push('Missing aud (audience) claim.');
+  if (!payload.iss) warnings.push('Missing iss (issuer) claim.');
 
   const sensitive = ['email', 'phone', 'ssn', 'password', 'credit', 'card'];
   const keys = Object.keys(payload).map((k) => k.toLowerCase());
   const found = sensitive.filter((s) => keys.some((k) => k.includes(s)));
-  if (found.length > 0) {
-    warnings.push(`Sensitive fields detected: ${found.join(', ')}.`);
-  }
+  if (found.length > 0) warnings.push(`Sensitive fields detected: ${found.join(', ')}.`);
 
   return warnings;
 }
@@ -115,9 +111,7 @@ function renderSecurityWarning(header, payload) {
   if (warnings.length > 0) {
     banner.style.display = 'block';
     let html = '<strong>⚠ Security Analysis:</strong><ul style="margin: 8px 0 0 20px; padding: 0;">';
-    warnings.forEach(w => {
-      html += `<li style="margin-bottom: 4px;">${w}</li>`;
-    });
+    warnings.forEach((w) => { html += `<li style="margin-bottom: 4px;">${escapeHtml(w)}</li>`; });
     html += '</ul>';
     banner.innerHTML = html;
   } else {
@@ -135,49 +129,11 @@ export function renderTokenParts(token) {
     return;
   }
   container.innerHTML =
-    `<span class="part-header">${parts[0]}</span>` +
+    `<span class="part-header">${escapeHtml(parts[0])}</span>` +
     `<span class="dot">.</span>` +
-    `<span class="part-payload">${parts[1]}</span>` +
+    `<span class="part-payload">${escapeHtml(parts[1])}</span>` +
     `<span class="dot">.</span>` +
-    `<span class="part-sig">${parts[2]}</span>`;
-}
-
-// ─── Diff ─────────────────────────────────────────────────────────────────────
-
-export function renderDiff(oldObj, newObj) {
-  const container = document.getElementById('diffOutput');
-  const allKeys = new Set([...Object.keys(oldObj), ...Object.keys(newObj)]);
-  let html = '';
-  let hasChanges = false;
-
-  for (const key of allKeys) {
-    const oldVal = oldObj[key];
-    const newVal = newObj[key];
-    if (JSON.stringify(oldVal) !== JSON.stringify(newVal)) {
-      hasChanges = true;
-      html += `<span class="diff-line diff-removed">${key}: ${_fmtDiffVal(key, oldVal)}</span>`;
-      html += `<span class="diff-line diff-added">${key}: ${_fmtDiffVal(key, newVal)}</span>`;
-      html += `<span class="diff-spacer"></span>`;
-    }
-  }
-
-  container.innerHTML = hasChanges
-    ? `<pre class="diff-pre">${html}</pre>`
-    : '<span class="empty">No changes detected</span>';
-}
-
-function _fmtDiffVal(key, val) {
-  if (TIME_FIELDS.includes(key) && typeof val === 'number') {
-    return `${val} (${formatTimestamp(val)})`;
-  }
-  return String(val);
-}
-
-// ─── Edit Tab ─────────────────────────────────────────────────────────────────
-
-export function renderEditTab(payload) {
-  document.getElementById('editPayload').value = JSON.stringify(payload, null, 2);
-  document.getElementById('editOutput').style.display = 'none';
+    `<span class="part-sig">${escapeHtml(parts[2])}</span>`;
 }
 
 // ─── Copy & Download Helpers ──────────────────────────────────────────────────

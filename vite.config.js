@@ -1,8 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  // Base path for GitHub Pages: https://thimmegowdatp.github.io/jwt-workbench/
-  base: '/jwt-workbench/',
+  base: './',
   root: '.',
   build: {
     outDir: 'dist',

@@ -1,8 +1,15 @@
 /**
  * core/decode.js
- * Decodes a JWT token into its header and payload objects.
- * Relies on jsrsasign's KJUR global loaded via CDN.
+ * Decodes a JWT into its header and payload objects.
  */
+
+function base64UrlToJson(part) {
+  let s = part.replace(/-/g, '+').replace(/_/g, '/');
+  while (s.length % 4) s += '=';
+  const binary = atob(s);
+  const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
 
 /**
  * @param {string} token - Raw JWT string
@@ -14,14 +21,14 @@ export function decodeJWT(token) {
     throw new Error('Token must be a non-empty string.');
   }
 
-  const parts = token.split('.');
+  const parts = token.trim().split('.');
   if (parts.length !== 3) {
     throw new Error(`Invalid JWT structure: expected 3 parts, got ${parts.length}.`);
   }
 
   try {
-    const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
-    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    const header = base64UrlToJson(parts[0]);
+    const payload = base64UrlToJson(parts[1]);
     return { header, payload };
   } catch (e) {
     throw new Error('Failed to decode token parts: ' + e.message);
