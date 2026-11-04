@@ -1,137 +1,159 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TokenGuard — JWT Security Assessment</title>
-  <meta name="description" content="TokenGuard analyzes JSON Web Tokens for security weaknesses, entirely in your browser.">
+  <meta name="description"
+    content="TokenGuard analyzes JSON Web Tokens for security weaknesses, entirely in your browser.">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
   <!-- jsrsasign — loaded before our modules so KJUR is available globally -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.8.6/jsrsasign-all-min.js"></script>
 </head>
+
 <body>
 
-<div class="wrapper">
+  <div class="wrapper">
 
-  <header>
-    <div class="header-left">
-      <div class="logo" aria-hidden="true">🛡️</div>
-      <div>
-        <h1>Token<span>Guard</span></h1>
-        <div class="tagline">decode · analyze · assess · report</div>
-      </div>
-    </div>
-    <div style="display: flex; gap: 12px; align-items: center;">
-      <button id="helpBtn" class="btn-text" aria-label="How to use">❓ Help</button>
-      <button id="themeToggle" aria-label="Toggle theme">☀ Light</button>
-    </div>
-  </header>
-
-  <!-- Input -->
-  <div class="card" role="region" aria-label="Token input">
-    <div class="card-label">Token Input</div>
-    <textarea id="jwtInput" placeholder="Paste your JWT here… (Ctrl+Enter to analyze)" spellcheck="false" aria-label="JWT token input"></textarea>
-
-    <div class="card-label" style="margin-top:14px;">Secret / Key (optional, used only to verify the signature)</div>
-    <div class="secret-row">
-      <input type="password" id="secretInput" placeholder="HMAC secret or PEM public key" aria-label="JWT secret or key">
-      <button class="toggle-secret" id="toggleSecretBtn" title="Show/hide secret" aria-label="Toggle secret visibility">👁</button>
-    </div>
-
-    <div class="warn-banner" role="alert">
-      ⚠ The secret stays in memory only. It is never saved, sent or included in reports.
-    </div>
-
-    <div id="securityWarning" role="alert"></div>
-
-    <div class="btn-row">
-      <button class="btn-primary" id="decodeBtn" aria-label="Analyze JWT">🔍 Analyze Token</button>
-      <button class="btn-danger" id="clearBtn" aria-label="Clear all fields">✕ Clear</button>
-    </div>
-  </div>
-
-  <!-- Output -->
-  <div class="card" id="outputCard" style="display:none;" role="region" aria-label="Decoded token output">
-    <div id="statusBadge" class="badge" role="status"></div>
-    <div id="sigVerifyResult"></div>
-
-    <div class="divider"></div>
-
-    <div class="tabs" role="tablist" aria-label="Token views">
-      <button class="tab active" data-tab="decoded" role="tab" aria-selected="true"  id="tab-btn-decoded">Decoded</button>
-      <button class="tab"        data-tab="raw"     role="tab" aria-selected="false" id="tab-btn-raw">Raw Token</button>
-    </div>
-
-    <div class="tab-pane active" id="tab-decoded" role="tabpanel" aria-labelledby="tab-btn-decoded">
-      <div class="decoded-grid">
-        <div class="decoded-box">
-          <div class="decoded-box-header"><div class="decoded-box-label">Header</div></div>
-          <pre class="json" id="headerOutput"></pre>
-        </div>
-        <div class="decoded-box">
-          <div class="decoded-box-header"><div class="decoded-box-label">Claims</div></div>
-          <table class="claims-table" id="claimsTable" aria-label="JWT claims">
-            <thead><tr><th>Claim</th><th>Value</th></tr></thead>
-            <tbody></tbody>
-          </table>
+    <header>
+      <div class="header-left">
+        <div class="logo" aria-hidden="true">🛡️</div>
+        <div>
+          <h1>Token<span>Guard</span></h1>
+          <div class="tagline">decode · analyze · assess · report</div>
         </div>
       </div>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <button id="helpBtn" class="btn-text" aria-label="How to use">❓ Help</button>
+        <button id="themeToggle" aria-label="Toggle theme">☀ Light</button>
+      </div>
+    </header>
 
-      <div class="decoded-box">
-        <div class="decoded-box-header">
-          <div class="decoded-box-label">Full Payload</div>
-          <div class="btn-row" style="margin-top:0;">
-            <button class="btn-copy"      id="copyPayloadBtn"     aria-label="Copy payload JSON">📋 Copy JSON</button>
-            <button class="btn-download"  id="downloadPayloadBtn" aria-label="Download payload as JSON">⬇ Download</button>
-            <button class="btn-secondary" id="downloadDebugReportBtn" aria-label="Download debug report" style="font-size: 0.72rem;">🐞 Debug Report</button>
+    <!-- Input -->
+    <div class="card" role="region" aria-label="Token input">
+      <div class="card-label">Token Input</div>
+      <textarea id="jwtInput" placeholder="Paste your JWT here… (Ctrl+Enter to analyze)" spellcheck="false"
+        aria-label="JWT token input"></textarea>
+
+      <div class="card-label" style="margin-top:14px;">Secret / Key (optional, used only to verify the signature)</div>
+      <div class="secret-row">
+        <input type="password" id="secretInput" placeholder="HMAC secret or PEM public key"
+          aria-label="JWT secret or key">
+        <button class="toggle-secret" id="toggleSecretBtn" title="Show/hide secret"
+          aria-label="Toggle secret visibility">👁</button>
+      </div>
+
+      <div class="warn-banner" role="alert">
+        ⚠ The secret stays in memory only. It is never saved, sent or included in reports.
+      </div>
+
+      <div id="securityWarning" role="alert"></div>
+
+      <div class="btn-row">
+        <button class="btn-primary" id="decodeBtn" aria-label="Analyze JWT">🔍 Analyze Token</button>
+        <button class="btn-danger" id="clearBtn" aria-label="Clear all fields">✕ Clear</button>
+      </div>
+    </div>
+    <!-- Dashboard -->
+    <div class="card" id="dashboardCard" style="display:none;" role="region" aria-label="Risk dashboard"></div>
+    <!-- Output -->
+    <div class="card" id="outputCard" style="display:none;" role="region" aria-label="Decoded token output">
+      <div id="statusBadge" class="badge" role="status"></div>
+      <div id="sigVerifyResult"></div>
+
+      <div class="divider"></div>
+
+      <div class="tabs" role="tablist" aria-label="Token views">
+        <button class="tab active" data-tab="decoded" role="tab" aria-selected="true"
+          id="tab-btn-decoded">Decoded</button>
+        <button class="tab" data-tab="raw" role="tab" aria-selected="false" id="tab-btn-raw">Raw Token</button>
+      </div>
+
+      <div class="tab-pane active" id="tab-decoded" role="tabpanel" aria-labelledby="tab-btn-decoded">
+        <div class="decoded-grid">
+          <div class="decoded-box">
+            <div class="decoded-box-header">
+              <div class="decoded-box-label">Header</div>
+            </div>
+            <pre class="json" id="headerOutput"></pre>
+          </div>
+          <div class="decoded-box">
+            <div class="decoded-box-header">
+              <div class="decoded-box-label">Claims</div>
+            </div>
+            <table class="claims-table" id="claimsTable" aria-label="JWT claims">
+              <thead>
+                <tr>
+                  <th>Claim</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
           </div>
         </div>
-        <pre class="json" id="payloadOutput"></pre>
+
+        <div class="decoded-box">
+          <div class="decoded-box-header">
+            <div class="decoded-box-label">Full Payload</div>
+            <div class="btn-row" style="margin-top:0;">
+              <button class="btn-copy" id="copyPayloadBtn" aria-label="Copy payload JSON">📋 Copy JSON</button>
+              <button class="btn-download" id="downloadPayloadBtn" aria-label="Download payload as JSON">⬇
+                Download</button>
+              <button class="btn-secondary" id="downloadDebugReportBtn" aria-label="Download debug report"
+                style="font-size: 0.72rem;">🐞 Debug Report</button>
+            </div>
+          </div>
+          <pre class="json" id="payloadOutput"></pre>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-raw" role="tabpanel" aria-labelledby="tab-btn-raw">
+        <div class="parts-legend">
+          <span class="legend-header">■ Header</span>
+          <span class="legend-payload">■ Payload</span>
+          <span class="legend-sig">■ Signature</span>
+        </div>
+        <div class="token-parts" id="tokenParts" aria-label="Color-coded token parts"></div>
       </div>
     </div>
 
-    <div class="tab-pane" id="tab-raw" role="tabpanel" aria-labelledby="tab-btn-raw">
-      <div class="parts-legend">
-        <span class="legend-header">■ Header</span>
-        <span class="legend-payload">■ Payload</span>
-        <span class="legend-sig">■ Signature</span>
-      </div>
-      <div class="token-parts" id="tokenParts" aria-label="Color-coded token parts"></div>
-    </div>
   </div>
 
-</div>
+  <footer class="app-footer">
+    <p>
+      TokenGuard is built on <a href="https://github.com/thimmegowdatp/jwt-workbench" target="_blank"
+        rel="noopener noreferrer">JWT Workbench</a>
+      by thimmegowdatp, used under the <a href="https://github.com/thimmegowdatp/jwt-workbench/blob/main/LICENSE"
+        target="_blank" rel="noopener noreferrer">MIT License</a>.
+    </p>
+  </footer>
 
-<footer class="app-footer">
-  <p>
-    TokenGuard is built on <a href="https://github.com/thimmegowdatp/jwt-workbench" target="_blank" rel="noopener noreferrer">JWT Workbench</a>
-    by thimmegowdatp, used under the <a href="https://github.com/thimmegowdatp/jwt-workbench/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>.
-  </p>
-</footer>
-
-<dialog id="helpModal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>📖 How to Use</h2>
-      <button id="closeHelpBtn" class="close-btn" aria-label="Close help">✕</button>
-    </div>
-    <div class="modal-body">
-      <ol class="help-list">
-        <li><strong>Paste a JWT</strong> into the top box.</li>
-        <li><strong>Optionally add the key</strong> to check the signature.</li>
-        <li><strong>Click Analyze Token</strong> to see the decoded contents and security findings.</li>
-      </ol>
-      <div class="warn-banner" style="margin-top: 16px;">
-        💡 Everything runs inside your browser. Tokens and secrets are never sent anywhere.
+  <dialog id="helpModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>📖 How to Use</h2>
+        <button id="closeHelpBtn" class="close-btn" aria-label="Close help">✕</button>
+      </div>
+      <div class="modal-body">
+        <ol class="help-list">
+          <li><strong>Paste a JWT</strong> into the top box.</li>
+          <li><strong>Optionally add the key</strong> to check the signature.</li>
+          <li><strong>Click Analyze Token</strong> to see the decoded contents and security findings.</li>
+        </ol>
+        <div class="warn-banner" style="margin-top: 16px;">
+          💡 Everything runs inside your browser. Tokens and secrets are never sent anywhere.
+        </div>
       </div>
     </div>
-  </div>
-</dialog>
+  </dialog>
 
-<div id="toast" role="status" aria-live="polite"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
 
-<script type="module" src="/src/main.js"></script>
+  <script type="module" src="/src/main.js"></script>
 
 </body>
+
 </html>

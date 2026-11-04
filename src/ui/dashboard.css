@@ -1,0 +1,102 @@
+/* ui/dashboard.css — TokenGuard dashboard */
+
+#dashboardCard {
+  --sev-critical: #ef4444;
+  --sev-high:     #f97316;
+  --sev-medium:   #d99a06;
+  --sev-low:      #3b82f6;
+  --sev-info:     #8b95a7;
+}
+
+.dash-top {
+  display: grid;
+  grid-template-columns: minmax(200px, 260px) 1fr;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+@media (max-width: 640px) {
+  .dash-top { grid-template-columns: 1fr; }
+}
+
+.gauge { text-align: center; }
+.gauge svg { width: 100%; max-width: 260px; height: auto; }
+.gauge-track { fill: none; stroke: var(--border2); stroke-width: 14; stroke-linecap: round; }
+.gauge-fill  { fill: none; stroke-width: 14; stroke-linecap: round; transition: stroke-dasharray 0.6s ease; }
+.gauge-score { font-size: 38px; font-weight: 800; fill: var(--text); }
+.gauge-of    { font-size: 11px; fill: var(--muted); }
+.gauge-level { font-size: 1rem; font-weight: 700; margin-top: 2px; }
+
+.sev-bars { display: grid; gap: 8px; }
+.sev-row {
+  display: grid;
+  grid-template-columns: 70px 1fr 28px;
+  gap: 10px;
+  align-items: center;
+  font-size: 0.78rem;
+  color: var(--text2);
+  background: none;
+  border: 0;
+  padding: 2px 0;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+.sev-row:hover .sev-name { color: var(--text); }
+.sev-name { text-transform: capitalize; }
+.sev-track { height: 12px; background: var(--surface3); border-radius: 6px; overflow: hidden; }
+.sev-bar   { height: 100%; border-radius: 6px; transition: width 0.5s ease; }
+.sev-count { text-align: right; font-weight: 700; color: var(--text); }
+
+.dash-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.dash-chip {
+  font-family: inherit;
+  font-size: 0.74rem;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text2);
+  cursor: pointer;
+}
+.dash-chip:hover { color: var(--text); }
+.dash-chip.active { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+
+.finding {
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  margin-bottom: 8px;
+}
+.finding summary {
+  cursor: pointer;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  list-style: none;
+  font-size: 0.86rem;
+  color: var(--text);
+}
+.finding summary::marker { content: ''; }
+.finding summary::before,
+.finding[open] summary::before { content: none; }
+.finding summary::-webkit-details-marker { display: none; }
+.finding summary::after { content: '▸'; margin-left: auto; color: var(--muted); }
+.finding[open] summary::after { content: '▾'; }
+.sev-badge {
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: #fff;
+  flex: none;
+}
+.finding-body { padding: 0 14px 12px; font-size: 0.82rem; color: var(--text2); line-height: 1.55; }
+.finding-body p { margin: 6px 0; }
+.finding-body strong { color: var(--text); }
+.finding-ref { font-size: 0.74rem; color: var(--muted); font-style: italic; }
+.dash-empty { padding: 14px; text-align: center; color: var(--text2); }

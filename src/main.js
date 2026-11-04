@@ -3,7 +3,7 @@
  */
 import './styles.css';
 
-import { decodeJWT }       from './core/decode.js';
+import { decodeJWT } from './core/decode.js';
 import { verifySignature } from './core/verify.js';
 
 import {
@@ -11,24 +11,24 @@ import {
   copyText, downloadJSON,
 } from './ui/renderer.js';
 import { analyzeToken as runAnalysis } from './core/analyzer.js';
-import { findWeakSecret }              from './core/weakSecrets.js';
-import { renderFindings }              from './ui/findings.js';
+import { findWeakSecret } from './core/weakSecrets.js';
+import { renderDashboard, hideDashboard } from './ui/dashboard.js';
 import { switchTab } from './ui/tabs.js';
-import { toast }     from './ui/toast.js';
+import { toast } from './ui/toast.js';
 
 // ─── Application State ────────────────────────────────────────────────────────
 
 const state = {
-  currentToken:   null,
-  currentHeader:  null,
+  currentToken: null,
+  currentHeader: null,
   currentPayload: null,
   signatureValid: null,
-  analysis:       null,
+  analysis: null,
 };
 
-const jwtInput    = () => document.getElementById('jwtInput');
+const jwtInput = () => document.getElementById('jwtInput');
 const secretInput = () => document.getElementById('secretInput');
-const outputCard  = () => document.getElementById('outputCard');
+const outputCard = () => document.getElementById('outputCard');
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
 
@@ -61,15 +61,15 @@ function updateThemeBtn(theme) {
 // ─── Analyze ──────────────────────────────────────────────────────────────────
 
 function analyzeToken() {
-  const token  = jwtInput().value.trim();
+  const token = jwtInput().value.trim();
   const secret = secretInput().value.trim();
 
   if (!token) { toast('⚠ Paste a JWT first', 2500, 'warn'); return; }
 
   try {
     const { header, payload } = decodeJWT(token);
-    state.currentToken   = token;
-    state.currentHeader  = header;
+    state.currentToken = token;
+    state.currentHeader = header;
     state.currentPayload = payload;
 
     renderDecoded(header, payload);
@@ -86,7 +86,7 @@ function analyzeToken() {
       weakSecret,
       keyIsPem: secret.includes('-----BEGIN'),
     });
-    renderFindings(state.analysis);
+    renderDashboard(state.analysis);
 
     outputCard().style.display = 'block';
     outputCard().scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -135,6 +135,7 @@ function clearAll() {
   state.currentPayload = null;
   state.signatureValid = null;
   state.analysis = null;
+  hideDashboard();
 }
 
 function toggleSecret() {
@@ -178,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
     helpModal.addEventListener('click', (e) => {
       const r = helpModal.getBoundingClientRect();
       const inside = e.clientX >= r.left && e.clientX <= r.right &&
-                     e.clientY >= r.top && e.clientY <= r.bottom;
+        e.clientY >= r.top && e.clientY <= r.bottom;
       if (!inside) helpModal.close();
     });
   }

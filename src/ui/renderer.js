@@ -56,7 +56,7 @@ export function renderDecoded(header, payload) {
   document.getElementById('payloadOutput').textContent = JSON.stringify(payload, null, 2);
   renderClaimsTable(payload);
   renderStatus(payload);
-  renderSecurityWarning(header, payload);
+
 }
 
 function renderClaimsTable(payload) {
