@@ -14,6 +14,7 @@ import { analyzeToken as runAnalysis } from './core/analyzer.js';
 import { findWeakSecret } from './core/weakSecrets.js';
 import { renderDashboard, hideDashboard } from './ui/dashboard.js';
 import { buildReport, reportFilename } from './core/report.js';
+import { SAMPLES, buildSampleToken } from './core/samples.js';
 import { switchTab } from './ui/tabs.js';
 import { toast } from './ui/toast.js';
 
@@ -137,7 +138,15 @@ function downloadPdfReport() {
   doc.save(reportFilename());
   toast('✓ PDF report downloaded');
 }
-
+function loadSample(id) {
+  const sample = SAMPLES.find((s) => s.id === id);
+  if (!sample) return;
+  const signer = (alg, headerJson, payloadJson, secret) =>
+    KJUR.jws.JWS.sign(alg, headerJson, payloadJson, { utf8: secret });
+  jwtInput().value = buildSampleToken(sample, signer);
+  secretInput().value = sample.secret || '';
+  analyzeToken();
+}
 function clearAll() {
   jwtInput().value = '';
   secretInput().value = '';
@@ -159,6 +168,14 @@ function toggleSecret() {
 
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
+  const sampleSelect = document.getElementById('sampleSelect');
+  if (sampleSelect) {
+    SAMPLES.forEach((s) => sampleSelect.add(new Option(s.name, s.id)));
+    sampleSelect.addEventListener('change', () => {
+      if (sampleSelect.value) loadSample(sampleSelect.value);
+    });
+  }
+
 
   // Demo token so the page isn't empty on first load
   if (!jwtInput().value) {

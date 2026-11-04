@@ -6,14 +6,14 @@ import { jsPDF } from 'jspdf';
 
 const SEV_RGB = {
   critical: [239, 68, 68],
-  high:     [249, 115, 22],
-  medium:   [217, 154, 6],
-  low:      [59, 130, 246],
-  info:     [139, 149, 167],
+  high: [249, 115, 22],
+  medium: [217, 154, 6],
+  low: [59, 130, 246],
+  info: [139, 149, 167],
 };
 const SEVERITIES = ['critical', 'high', 'medium', 'low', 'info'];
 const SENSITIVE_KEYS = ['password', 'passwd', 'pwd', 'secret', 'ssn', 'credit', 'cvv', 'card',
-                        'phone', 'email', 'address', 'dob', 'birth'];
+  'phone', 'email', 'address', 'dob', 'birth'];
 
 /** jsPDF's built-in fonts only support Latin-1, so replace anything else. */
 function clean(value) {
@@ -139,10 +139,10 @@ export function buildReport({ analysis, header, payload, signatureValid, date = 
   // ── Method & limitations ──
   heading('Method and limitations');
   text('Scoring: each finding adds points by severity (Critical 40, High 25, Medium 10, Low 3, Info 0), capped at 100. ' +
-       'Levels: 0-19 Low, 20-49 Medium, 50-79 High, 80-100 Critical.', { size: 9 });
+    'Any Critical finding raises the score to at least 80. Levels: 0-19 Low, 20-49 Medium, 50-79 High, 80-100 Critical.', { size: 9 });
   text('This is a static assessment of the token as supplied. TokenGuard does not attack or send requests to any server and cannot ' +
-       'tell how a particular server validates tokens. The weak-secret check tries only a short built-in list of common secrets, so a ' +
-       'pass does not prove a secret is strong. Results reflect the moment of analysis; expiry-based findings change over time.', { size: 9 });
+    'tell how a particular server validates tokens. The weak-secret check tries only a short built-in list of common secrets, so a ' +
+    'pass does not prove a secret is strong. Results reflect the moment of analysis; expiry-based findings change over time.', { size: 9 });
 
   // ── Page numbers ──
   const pages = doc.getNumberOfPages();

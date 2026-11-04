@@ -255,6 +255,18 @@ describe('scoring', () => {
         expect(r.score).toBe(100);
         expect(r.level).toBe('Critical');
     });
+    it('raises the score to at least 80 when there is any critical finding', () => {
+        const r = run({ header: { alg: 'none', typ: 'JWT' } });
+        expect(r.counts.critical).toBe(1);
+        expect(r.score).toBe(80);
+        expect(r.level).toBe('Critical');
+    });
+
+    it('does not raise the score when there is no critical finding', () => {
+        const r = run({ payload: { ...goodPayload, iat: NOW - 100, exp: NOW - 10 } });
+        expect(r.score).toBe(25);
+        expect(r.level).toBe('Medium');
+    });
 
     it('counts findings per severity', () => {
         const r = run({ header: { alg: 'none', typ: 'JWT' } });

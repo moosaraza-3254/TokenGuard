@@ -190,6 +190,8 @@ export function analyzeToken({
         score += SEVERITY_WEIGHTS[x.severity];
     }
     score = Math.min(100, score);
+    // Any single critical finding means the token cannot be trusted: never rate it below 80.
+    if (counts.critical > 0) score = Math.max(score, 80);
 
     return { findings: f, score, level: scoreToLevel(score), counts };
 }

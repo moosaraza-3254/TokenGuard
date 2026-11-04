@@ -33,6 +33,11 @@
 
     <!-- Input -->
     <div class="card" role="region" aria-label="Token input">
+      <div class="card-label">Load a sample token</div>
+      <select id="sampleSelect" aria-label="Load a sample token"
+        style="width:100%; margin-bottom:14px; padding:9px 12px; background:var(--surface2); color:var(--text); border:1px solid var(--border2); border-radius:8px; font-family:inherit;">
+        <option value="">— choose a sample —</option>
+      </select>
       <div class="card-label">Token Input</div>
       <textarea id="jwtInput" placeholder="Paste your JWT here… (Ctrl+Enter to analyze)" spellcheck="false"
         aria-label="JWT token input"></textarea>
