@@ -21,5 +21,8 @@
     "developer-tools",
     "security"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "jspdf": "^4.2.1"
+  }
 }

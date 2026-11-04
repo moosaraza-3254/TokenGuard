@@ -13,6 +13,7 @@ import {
 import { analyzeToken as runAnalysis } from './core/analyzer.js';
 import { findWeakSecret } from './core/weakSecrets.js';
 import { renderDashboard, hideDashboard } from './ui/dashboard.js';
+import { buildReport, reportFilename } from './core/report.js';
 import { switchTab } from './ui/tabs.js';
 import { toast } from './ui/toast.js';
 
@@ -125,6 +126,17 @@ function downloadDebugReport() {
     signatureVerified: state.signatureValid,
   }, 'tokenguard-report.json');
 }
+function downloadPdfReport() {
+  if (!state.analysis) { toast('⚠ Analyze a token first', 2500, 'warn'); return; }
+  const doc = buildReport({
+    analysis: state.analysis,
+    header: state.currentHeader,
+    payload: state.currentPayload,
+    signatureValid: state.signatureValid,
+  });
+  doc.save(reportFilename());
+  toast('✓ PDF report downloaded');
+}
 
 function clearAll() {
   jwtInput().value = '';
@@ -159,6 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
   document.getElementById('decodeBtn')?.addEventListener('click', analyzeToken);
   document.getElementById('clearBtn')?.addEventListener('click', clearAll);
+  document.getElementById('downloadPdfBtn')?.addEventListener('click', downloadPdfReport);
   document.getElementById('toggleSecretBtn')?.addEventListener('click', toggleSecret);
 
   document.querySelectorAll('.tab').forEach((btn) => {
