@@ -8,8 +8,11 @@ import { verifySignature } from './core/verify.js';
 
 import {
   renderDecoded, renderSigResult, renderTokenParts,
-  copyText, downloadJSON, getSecurityWarnings,
+  copyText, downloadJSON,
 } from './ui/renderer.js';
+import { analyzeToken as runAnalysis } from './core/analyzer.js';
+import { findWeakSecret }              from './core/weakSecrets.js';
+import { renderFindings }              from './ui/findings.js';
 import { switchTab } from './ui/tabs.js';
 import { toast }     from './ui/toast.js';
 
@@ -20,6 +23,7 @@ const state = {
   currentHeader:  null,
   currentPayload: null,
   signatureValid: null,
+  analysis:       null,
 };
 
 const jwtInput    = () => document.getElementById('jwtInput');
@@ -74,6 +78,16 @@ function analyzeToken() {
     renderSigResult(verifyResult || {});
     renderTokenParts(token);
 
+    const weakSecret = findWeakSecret(token, header.alg, (t, s, a) => verifySignature(t, s, a).valid);
+    state.analysis = runAnalysis({
+      header,
+      payload,
+      signature: verifyResult ? { checked: true, valid: verifyResult.valid } : null,
+      weakSecret,
+      keyIsPem: secret.includes('-----BEGIN'),
+    });
+    renderFindings(state.analysis);
+
     outputCard().style.display = 'block';
     outputCard().scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     switchTab('decoded');
@@ -107,7 +121,7 @@ function downloadDebugReport() {
     token: { safeString: safeToken },
     header: state.currentHeader,
     payload: state.currentPayload,
-    securityAnalysis: getSecurityWarnings(state.currentHeader, state.currentPayload),
+    securityAnalysis: state.analysis,
     signatureVerified: state.signatureValid,
   }, 'tokenguard-report.json');
 }
@@ -120,6 +134,7 @@ function clearAll() {
   state.currentHeader = null;
   state.currentPayload = null;
   state.signatureValid = null;
+  state.analysis = null;
 }
 
 function toggleSecret() {
