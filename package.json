@@ -1,0 +1,25 @@
+{
+  "name": "jwt-workbench",
+  "version": "1.0.0",
+  "description": "A production-ready, browser-based JWT debugging tool — decode, verify, extend, and re-sign tokens.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "jsdom": "^29.0.2",
+    "vite": "^5.4.0",
+    "vitest": "^1.6.0"
+  },
+  "keywords": [
+    "jwt",
+    "json-web-token",
+    "debug",
+    "developer-tools",
+    "security"
+  ],
+  "license": "MIT"
+}

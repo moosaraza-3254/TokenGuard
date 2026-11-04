@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://thimmegowdatp.github.io/jwt-workbench/sitemap.xml
