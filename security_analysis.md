@@ -1,6 +1,6 @@
 # TokenGuard: Security Analysis
 
-*Moosa Raza (23L-2546), Muhammad Shayan (23L-3011), Muhammad Anas (23L-3005). Advisor: Ms. Sarah Abid Khan. FAST-NUCES Lahore, Information Security.*
+*Moosa Raza (23L-2546), Muhammad Shayan (23L-3011), Muhammad Anas (23L-3005). FAST-NUCES Lahore, Information Security.*
 
 ## 1. Purpose and scope
 
